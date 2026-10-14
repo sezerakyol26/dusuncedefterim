@@ -2,22 +2,20 @@
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
-    
-    <!-- Optimized viewport for iOS Mobile Native feel (prevents zoom jitter, enables notch coverage) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    
     <title>Düşünce Defteri</title>
 
-    <!-- General Favicon & PWA Icons for Desktop & Mobile -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@1,400;1,500;1,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon & PWA Icons -->
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="icon" type="image/png" sizes="48x48" href="./favicon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
-    
-    <!-- Apple iOS Homescreen Touch Icon -->
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    
-    <!-- Web App Manifest -->
     <link rel="manifest" href="./manifest.json" />
 
     <!-- iOS & Android Standalone App Settings -->
@@ -26,15 +24,85 @@
     <meta name="apple-mobile-web-app-title" content="Defter" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="Düşünce Defteri" />
-
-    <!-- Theme Colors for System Bars -->
     <meta name="theme-color" content="#1C1814" />
+
+    <link rel="stylesheet" href="./assets/app.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              stone: {
+                850: '#201c18',
+                950: '#0c0a09'
+              }
+            },
+            fontFamily: {
+              sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+              display: ["Space Grotesk", "sans-serif"],
+              serif: ["Lora", "Georgia", "serif"]
+            }
+          }
+        }
+      }
+    </script>
+
+    <style>
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background-color: #FDFCFB;
+        color: #1C1C1E;
+        -webkit-font-smoothing: antialiased;
+      }
+      .dark body {
+        background-color: #0c0a09;
+        color: #f5f5f4;
+      }
+      .scrollbar-none::-webkit-scrollbar { display: none; }
+      .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .ios-glass {
+        background: rgba(253, 251, 247, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .dark .ios-glass {
+        background: rgba(12, 10, 9, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .safe-top-padding { padding-top: max(env(safe-area-inset-top, 0px), 14px); }
+      .safe-bottom-padding { padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px); }
+    </style>
+
+    <!-- Import Map: Zero-Build browser native execution -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@19.0.0",
+        "react/": "https://esm.sh/react@19.0.0/",
+        "react-dom": "https://esm.sh/react-dom@19.0.0",
+        "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.475.0",
+        "firebase/app": "https://esm.sh/firebase@11.4.0/app",
+        "firebase/firestore": "https://esm.sh/firebase@11.4.0/firestore",
+        "@google/genai": "https://esm.sh/@google/genai@2.4.0"
+      }
+    }
+    </script>
   </head>
   <body class="overflow-x-hidden select-none bg-[#FDFBF7] dark:bg-stone-950">
     <div id="root"></div>
-    
-    <!-- Main TypeScript Entry Point -->
-    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Production Standalone App Bundle (Runs directly without any build step) -->
+    <script type="module" src="./assets/app.js"></script>
 
     <!-- Register PWA Service Worker -->
     <script>
@@ -42,10 +110,10 @@
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./service-worker.js')
             .then((registration) => {
-              console.log('Düşünce Defteri ServiceWorker registered with scope:', registration.scope);
+              console.log('Düşünce Defteri SW aktif:', registration.scope);
             })
             .catch((error) => {
-              console.warn('ServiceWorker registration error:', error);
+              console.warn('SW kaydı:', error);
             });
         });
       }

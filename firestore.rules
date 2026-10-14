@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Catch-all rule to deny access by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function hasValidSyncCode(data) {
+      return data != null && 
+             data.syncCode is string && 
+             data.syncCode.size() >= 3 && 
+             data.syncCode.size() <= 20;
+    }
+
+    match /entries/{entryId} {
+      allow read: if isValidId(entryId) && (
+        resource != null && hasValidSyncCode(resource.data)
+      );
+
+      allow create: if isValidId(entryId) && 
+                    hasValidSyncCode(request.resource.data);
+
+      allow update: if isValidId(entryId) && 
+                    hasValidSyncCode(request.resource.data) &&
+                    (resource == null || resource.data.syncCode == request.resource.data.syncCode);
+
+      allow delete: if isValidId(entryId);
+    }
+  }
+}

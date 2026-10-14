@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "ThoughtEntry": {
+      "title": "ThoughtEntry",
+      "description": "A single diary/thought entry belonging to a specific sync code.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the entry."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the entry."
+        },
+        "category": {
+          "type": "string",
+          "description": "Thought category."
+        },
+        "mood": {
+          "type": "string",
+          "description": "Associated mood."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of creation date."
+        },
+        "isBookmarked": {
+          "type": "boolean",
+          "description": "Whether the entry is favorited."
+        },
+        "syncCode": {
+          "type": "string",
+          "description": "6-character alphanumeric sync code."
+        }
+      },
+      "required": [
+        "id",
+        "content",
+        "category",
+        "mood",
+        "createdAt",
+        "syncCode"
+      ]
+    }
+  },
+  "firestore": {
+    "entries/{entryId}": {
+      "schema": "ThoughtEntry",
+      "description": "Collection of journal entries shared via sync codes."
+    }
+  }
+}

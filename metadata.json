@@ -1,0 +1,6 @@
+{
+  "name": "Düşünce Defteri",
+  "description": "Zihinsel farkındalık, kişisel gelişim ve günlük ilham veren yapay zekâ destekli iOS tarzı düşünce defteri.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

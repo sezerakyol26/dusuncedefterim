@@ -167,6 +167,38 @@ export function generateLocalReflection(entries: ThoughtEntry[], timeframeLabel:
 
   const gratitudeCount = categoryCounts[ThoughtCategory.GRATITUDE] || 0;
   const challengeCount = categoryCounts[ThoughtCategory.CHALLENGE] || 0;
+  const intentionCount = categoryCounts[ThoughtCategory.INTENTION] || 0;
+  const reflectionCount = categoryCounts[ThoughtCategory.REFLECTION] || 0;
+  const ideaCount = categoryCounts[ThoughtCategory.IDEA] || 0;
+
+  const isAnxiousHeavy = anxiousOrStressedCount > entries.length * 0.35;
+  const isGratitudeHeavy = gratitudeCount > 0;
+  const isChallengeHeavy = challengeCount > 0;
+
+  // Calculate Mental Balance Score (62 - 96)
+  let baseScore = 74;
+  if (positiveMoodCount > anxiousOrStressedCount) baseScore += 8;
+  if (isGratitudeHeavy) baseScore += 5;
+  if (intentionCount > 0) baseScore += 4;
+  if (challengeCount > 0 && positiveMoodCount > 0) baseScore += 3; // emotional resilience
+  if (isAnxiousHeavy) baseScore -= 7;
+  const mentalBalanceScore = Math.min(96, Math.max(62, baseScore));
+
+  let balanceStatus = "Dengeli & Huzurlu Akış";
+  if (isAnxiousHeavy) {
+    balanceStatus = "Yenilenme & Öz-Şefkat İhtiyacı";
+  } else if (dominantMood === Mood.EXCITED || dominantMood === Mood.HOPEFUL || dominantMood === Mood.PROUD) {
+    balanceStatus = "Canlı, Üretken & Umutlu Dinamik";
+  } else if (dominantMood === Mood.REFLECTIVE || reflectionCount > entries.length * 0.4) {
+    balanceStatus = "Yüksek İçsel Farkındalık & Derinleşme";
+  }
+
+  // Emotional Metrics (Clamped 55-95)
+  const clarity = Math.min(95, Math.max(60, 68 + (reflectionCount * 5) + (intentionCount * 4) - (moodCounts[Mood.OVERWHELMED] || 0) * 6));
+  const selfCompassion = Math.min(95, Math.max(58, 70 + (gratitudeCount * 6) + ((moodCounts[Mood.LOVED] || 0) * 5) - (isAnxiousHeavy ? 5 : 0)));
+  const resilience = Math.min(95, Math.max(65, 72 + (challengeCount * 5) + (positiveMoodCount * 3)));
+  const energyLevel = Math.min(95, Math.max(55, 66 + ((moodCounts[Mood.EXCITED] || 0) * 8) + ((moodCounts[Mood.HOPEFUL] || 0) * 5) - ((moodCounts[Mood.TIRED] || 0) * 8)));
+
   // 1. Semantic Text & Theme Extraction from user's entries
   const allText = entries.map(e => e.content.toLowerCase()).join(" ");
   const hasWorkTheme = ["proje", "iş", "çalış", "yetiş", "görev", "sorumluluk", "hedef", "plan", "kariyer", "başarı"].some(w => allText.includes(w));

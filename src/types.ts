@@ -43,6 +43,18 @@ export interface AISelfReflection {
   growthRecommendations: string[]; // Gelisim onerileri
   introspectiveQuestion: string; // Oz-sorgulama sorusu
   overallVibe: string; // Genel ruh hali analizi
+  mentalBalanceScore?: number; // 0 - 100 arasi zihinsel denge puani
+  balanceStatus?: string; // Denge durumu ozeti (orn: "Dengeli ve Farkinda")
+  emotionalMetrics?: {
+    clarity: number; // Zihinsel Berraklik (0-100)
+    selfCompassion: number; // Oz-Sefkat Egilimi (0-100)
+    resilience: number; // Duygusal Dayaniklilik (0-100)
+    energyLevel: number; // Icsel Canlilik / Enerji (0-100)
+  };
+  strengths?: string[]; // Fark edilen gizli psikolojik gucler ve dayaniklik kaynaklari
+  mindfulAffirmation?: string; // Gunun sifali oz-sefkat olumlamasi
+  analyzedEntriesCount?: number; // Analize dahil edilen kayit sayisi
+  timeframe?: string; // Analiz donemi (orn: "Son 7 Gun", "Tum Zamanlar")
   generatedAt: string;
 }
 

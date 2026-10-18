@@ -211,9 +211,14 @@ app.post("/api/analyze-thoughts", async (req, res) => {
       Lütfen bu metinleri bütünsel olarak oku. Kullanıcının farkında olmadığı düşünce kalıplarını, zihinsel durum eğilimlerini ve zayıf/güçlü yönlerini belirle.
       Şu parametreleri içeren bir Türkçe analiz raporu üret:
       1. overallVibe: Genel zihinsel iklim, hissettikleri ve zihinsel akışı üzerine özetleyici şefkatli bir değerlendirme.
-      2. cognitivePatterns: Son yazılarda gözlenen 2 ya da 3 adet zihinsel/bilişsel örüntü, inanç kalıbı veya eğilim (Her birini mutlaka 'Kalıp Başlığı: Şefkatli açıklama' biçiminde açık ve net bir başlıkla yapılandır).
-      3. growthRecommendations: Kullanıcının zihinsel rahatlığı ve kişisel gelişimi için 2 ya da 3 adet şefkatli, uygulanabilir ve pratik gelişim tavsiyesi.
-      4. introspectiveQuestion: Kullanıcının kendi içine dönüp derinleşerek zihninde yanıt arayabileceği, tetikleyici olmayan güçlü bir öz-sorgulama sorusu.
+      2. cognitivePatterns: Son yazılarda gözlenen 2 ya da 3 adet zihinsel/bilişsel örüntü ('Kalıp Başlığı: Şefkatli açıklama' biçiminde).
+      3. growthRecommendations: Kullanıcının zihinsel rahatlığı ve gelişimi için 2 ya da 3 adet şefkatli, pratik tavsiye.
+      4. introspectiveQuestion: Kullanıcıya özel derin bir öz-sorgulama sorusu.
+      5. mentalBalanceScore: 0-100 arasında genel zihinsel denge puanı (sayı).
+      6. balanceStatus: Zihinsel iklimi özetleyen kısa unvan (örn: 'Dengeli & Huzurlu Akış').
+      7. emotionalMetrics: clarity, selfCompassion, resilience, energyLevel (0-100 arası sayılar).
+      8. strengths: Kullanıcının yazılarında fark edilen 2-3 gizli psikolojik güç ve dayanıklılık kaynağı.
+      9. mindfulAffirmation: Bu ruh haline özel şifalı tek cümlelik bir günlük olumlama cümlesi.
       
       Yanıtı kesinlikle verdiğim JSON şemasına göre sağla.`;
 
@@ -241,7 +246,32 @@ app.post("/api/analyze-thoughts", async (req, res) => {
               },
               introspectiveQuestion: {
                 type: Type.STRING,
-                description: "Kullanıcıya özel öz sorgulama, zihinsel açılım sorusu"
+                description: "Kullanıcıya özel öz sorgulama sorusu"
+              },
+              mentalBalanceScore: {
+                type: Type.NUMBER,
+                description: "0-100 zihinsel denge puanı"
+              },
+              balanceStatus: {
+                type: Type.STRING,
+                description: "Denge durumu özeti"
+              },
+              emotionalMetrics: {
+                type: Type.OBJECT,
+                properties: {
+                  clarity: { type: Type.NUMBER },
+                  selfCompassion: { type: Type.NUMBER },
+                  resilience: { type: Type.NUMBER },
+                  energyLevel: { type: Type.NUMBER }
+                },
+                required: ["clarity", "selfCompassion", "resilience", "energyLevel"]
+              },
+              strengths: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING }
+              },
+              mindfulAffirmation: {
+                type: Type.STRING
               }
             },
             required: ["overallVibe", "cognitivePatterns", "growthRecommendations", "introspectiveQuestion"]
@@ -261,6 +291,20 @@ app.post("/api/analyze-thoughts", async (req, res) => {
   // Fallback Reflection
   res.json({
     overallVibe: "Yazılarınız, hayatın getirdiği iniş çıkışların ortasında kendinize dürüstçe alan açmaya çalıştığınızı gösteriyor. Bazen belirsizlikler ve sorumluluklar sizi yorsa da, duygularınızı yazıya dökmeniz en büyük farkındalık gücünüz.",
+    mentalBalanceScore: 82,
+    balanceStatus: "Dengeli & Derin Farkındalık",
+    emotionalMetrics: {
+      clarity: 80,
+      selfCompassion: 78,
+      resilience: 85,
+      energyLevel: 75
+    },
+    strengths: [
+      "Öz-Farkındalık Cesareti: İç dünyanızdaki duyguları dürüstçe adlandırıp yazıya dökebilme gücünüz.",
+      "Minnettarlık Refleksi: Zorlayıcı dönemlerde dahi teşekkür edilecek minik detayları görebilme zenginliğiniz.",
+      "Duygusal Dayanıklılık: Zorlukları bastırmak yerine anlamlandırma isteğiniz."
+    ],
+    mindfulAffirmation: "Bugün kendime nazik davranmayı, her şeyi tek başıma çözmek zorunda olmadığımı ve olduğum halimle değerli olduğumu hatırlıyorum.",
     cognitivePatterns: [
       "Kontrol ve Gelecek Odaklılık: Zihniniz çoğunlukla henüz gerçekleşmemiş olasılıkları planlamaya ve kontrol altında tutmaya eğilim gösteriyor.",
       "Gizli Öz-Eleştiri: Zorlu durumlarda kendinize mola vermeyi hak edilmesi gereken bir lüks gibi görme kalıbı seziliyor.",

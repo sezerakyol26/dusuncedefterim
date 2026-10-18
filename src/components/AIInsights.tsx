@@ -78,15 +78,26 @@ export default function AIInsights({ entries, onAddEntry }: AIInsightsProps) {
 
   const timeframeLabel = timeframe === "7D" ? "Son 7 Gün" : timeframe === "30D" ? "Son 30 Gün" : "Tüm Zamanlar";
 
-  // Load cached reflection on mount
+  // Load cached reflection on mount or auto-refresh if outdated
   useEffect(() => {
     const cached = localStorage.getItem("thought_defteri_reflection");
+    let hasValidModernReflection = false;
     if (cached) {
       try {
-        setReflection(JSON.parse(cached));
+        const parsed = JSON.parse(cached);
+        // If cached reflection has the modern fields and is recent, load it
+        if (parsed && parsed.overallVibe && parsed.strengths && parsed.mentalBalanceScore) {
+          setReflection(parsed);
+          hasValidModernReflection = true;
+        }
       } catch (e) {
         console.error("Error loading cached reflection", e);
       }
+    }
+
+    // If no valid modern reflection exists and we have enough entries, generate a fresh one
+    if (!hasValidModernReflection && entries.length >= 2) {
+      triggerAnalysis(filteredEntries, timeframeLabel);
     }
   }, []);
 

@@ -167,50 +167,58 @@ export function generateLocalReflection(entries: ThoughtEntry[], timeframeLabel:
 
   const gratitudeCount = categoryCounts[ThoughtCategory.GRATITUDE] || 0;
   const challengeCount = categoryCounts[ThoughtCategory.CHALLENGE] || 0;
-  const intentionCount = categoryCounts[ThoughtCategory.INTENTION] || 0;
-  const reflectionCount = categoryCounts[ThoughtCategory.REFLECTION] || 0;
-  const ideaCount = categoryCounts[ThoughtCategory.IDEA] || 0;
+  // 1. Semantic Text & Theme Extraction from user's entries
+  const allText = entries.map(e => e.content.toLowerCase()).join(" ");
+  const hasWorkTheme = ["proje", "iş", "çalış", "yetiş", "görev", "sorumluluk", "hedef", "plan", "kariyer", "başarı"].some(w => allText.includes(w));
+  const hasSocialTheme = ["arkadaş", "ekip", "aile", "insan", "güven", "ilişki", "yalnız", "başkaları", "yardım"].some(w => allText.includes(w));
+  const hasRestTheme = ["kahve", "balkon", "sabah", "akşam", "mola", "dinlen", "yavaş", "nefes", "kuş", "huzur", "sessiz", "uyku"].some(w => allText.includes(w));
+  const hasControlTheme = ["mahvol", "kontrol", "hata", "kusursuz", "mükemmel", "tek başıma", "zorundayım", "yapmalıyım"].some(w => allText.includes(w));
+  const hasFutureTheme = ["gelecek", "belirsiz", "korku", "kaygı", "ne olacak", "endişe", "ihtimal", "stres"].some(w => allText.includes(w));
 
-  const isAnxiousHeavy = anxiousOrStressedCount > entries.length * 0.35;
-  const isGratitudeHeavy = gratitudeCount > 0;
-  const isChallengeHeavy = challengeCount > 0;
+  // 2. Dynamic Overall Vibe construction (Randomized & Contextual)
+  const intros = [
+    "Son dönemde defterinize bıraktığınız düşünce izleri incelendiğinde, zihninizin derin bir içsel gözlem ve anlamlandırma sürecinden geçtiği görülüyor.",
+    "Yazılarınızın satır aralarında, bir yandan hayatın getirdiği sorumlulukları karşılarken diğer yandan kendi iç dinginliğinizi koruma çabanız yankılanıyor.",
+    "Düşünce akışınız, hislerinizi halının altına süpürmek yerine onları cesurca adlandırıp yüzleştiğiniz oldukça olgun bir farkındalık zeminine işaret ediyor.",
+    "Zihninizin aynasına baktığımızda, zıt duyguların (zorluklar ile dingin anların) bir arada var olmasına izin verdiğiniz insani ve dengeli bir arayış seziliyor.",
+    "Notlarınızdaki duygusal dalgalanmalar, dış dünyadaki olayları yalnızca yüzeysel yaşamak yerine içsel dünyanızla harmanlayarak derinleştiğinizi yansıtıyor."
+  ];
 
-  // Calculate Mental Balance Score (62 - 96)
-  let baseScore = 74;
-  if (positiveMoodCount > anxiousOrStressedCount) baseScore += 8;
-  if (isGratitudeHeavy) baseScore += 5;
-  if (intentionCount > 0) baseScore += 4;
-  if (challengeCount > 0 && positiveMoodCount > 0) baseScore += 3; // emotional resilience
-  if (isAnxiousHeavy) baseScore -= 7;
-  const mentalBalanceScore = Math.min(96, Math.max(62, baseScore));
-
-  let balanceStatus = "Dengeli & Huzurlu Akış";
-  if (isAnxiousHeavy) {
-    balanceStatus = "Yenilenme & Öz-Şefkat İhtiyacı";
-  } else if (dominantMood === Mood.EXCITED || dominantMood === Mood.HOPEFUL || dominantMood === Mood.PROUD) {
-    balanceStatus = "Canlı, Üretken & Umutlu Dinamik";
-  } else if (dominantMood === Mood.REFLECTIVE || reflectionCount > entries.length * 0.4) {
-    balanceStatus = "Yüksek İçsel Farkındalık & Derinleşme";
+  const themeObservations: string[] = [];
+  if (hasWorkTheme && (hasControlTheme || isAnxiousHeavy)) {
+    themeObservations.push("Özellikle görevler ve projeler karşısında 'her şeyi tek başıma ve kusursuz yönetmeliyim' inancının zihninizi zaman zaman yorduğu; fakat aynı zamanda sınırlarınızı fark edip ekip desteğine güvenme arayışınız dikkat çekiyor.");
+  }
+  if (hasRestTheme) {
+    themeObservations.push("Koşturmacanın ortasında kahve yudumlarken, balkonda veya sessiz anlarda yakaladığınız o minik duraklamalar, zihninizin en güçlü içsel şifa ve toparlanma vahası olarak parlıyor.");
+  }
+  if (hasSocialTheme) {
+    themeObservations.push("İnsanlarla olan ilişkilerinizde hem güven duyma hem de kendi sınırlarınızı koruma yolunda önemli bir duygusal olgunluk ve esneklik inşa ediyorsunuz.");
+  }
+  if (hasFutureTheme) {
+    themeObservations.push("Geleceğe ve kontrol dışı ihtimallere odaklanmanın getirdiği ağırlığı, nefesinize ve şimdiki anın somut adımlarına dönerek dengeleme çabanız çok kıymetli.");
+  }
+  if (isGratitudeHeavy) {
+    themeObservations.push("Zorlu şartlarda dahi teşekkür edilecek detayları yakalayabilme esnekliğiniz, karamsarlık dalgalarına karşı en koruyucu içsel kalkanınız işlevi görüyor.");
+  }
+  if (themeObservations.length === 0) {
+    themeObservations.push("Kendinize karşı yargılayıcı bir eleştirmen olmak yerine, meraklı ve şefkatli bir araştırmacı gibi yaklaşabilmeniz zihinsel berraklığınızı günden güne artırıyor.");
   }
 
-  // Emotional Metrics (Clamped 55-95)
-  const clarity = Math.min(95, Math.max(60, 68 + (reflectionCount * 5) + (intentionCount * 4) - (moodCounts[Mood.OVERWHELMED] || 0) * 6));
-  const selfCompassion = Math.min(95, Math.max(58, 70 + (gratitudeCount * 6) + ((moodCounts[Mood.LOVED] || 0) * 5) - (isAnxiousHeavy ? 5 : 0)));
-  const resilience = Math.min(95, Math.max(65, 72 + (challengeCount * 5) + (positiveMoodCount * 3)));
-  const energyLevel = Math.min(95, Math.max(55, 66 + ((moodCounts[Mood.EXCITED] || 0) * 8) + ((moodCounts[Mood.HOPEFUL] || 0) * 5) - ((moodCounts[Mood.TIRED] || 0) * 8)));
+  const closings = [
+    "Unutmayın ki zihniniz her şeyi tek başına ve anında çözmek zorunda değil; bazen sadece durmak ve derin bir nefes almak en büyük eylemdir.",
+    "Mükemmellik değil samimi bir gelişim hedeflediğinizde, attığınız her küçük adımın ne kadar değerli olduğunu daha berrak göreceksiniz.",
+    "Bugün kendinize bir dost şefkatiyle bakın; yaşadığınız her his geçici bir hava durumudur ve siz tüm bunların arkasındaki engin gökyüzüsünüz.",
+    "Kendinize mola vermeyi hak edilmesi gereken zorlu bir ödül değil, dengeli ve huzurlu bir yaşamın en doğal gereksinimi olarak hediye edin.",
+    "İçinizdeki sese kulak vermeye devam edin; yazıya dökülen her düşünce zihninizdeki yükü hafifleten zarif bir arınmadır."
+  ];
 
-  let overallVibe = "";
-  if (isAnxiousHeavy) {
-    overallVibe = `Son dönem notlarınızda zihninizin belirli bir sorumluluk, belirsizlik veya kontrol arayışıyla yoğunlaştığı gözlemleniyor. Bir yandan yükleri omuzlarken diğer yandan kendinize yeterince nefes alma ve duraklama alanı tanımakta zorlanıyor olabilirsiniz. Bu yoğunluğu fark edip yazıya dökebilmeniz, yükü hafifletmenin en cesur adımıdır.`;
-  } else if (dominantMood === Mood.CALM || dominantMood === Mood.GRATEFUL) {
-    overallVibe = `Zihniniz dengeli, farkındalık dolu ve sakin bir zeminde akıyor. Günlük hayatın küçük detaylarındaki güzellikleri ve içsel huzuru takdir edebilme yetiniz, zorlu anlarda sığınabileceğiniz en güçlü iç kaynağınızdır.`;
-  } else if (dominantMood === Mood.EXCITED || dominantMood === Mood.HOPEFUL || dominantMood === Mood.PROUD) {
-    overallVibe = `Yazılarınızdan canlı, üretken ve geleceğe umutla bakan bir enerji yayılıyor. Yeni fikirler üretme ve hedeflerinize yönelme motivasyonunuz yüksek; bu dinamiği öz-şefkatle ve dengeli molalarla taçlandırmak sizi daha da güçlendirecektir.`;
-  } else {
-    overallVibe = `Son dönem notlarınız, derin bir içsel gözlem, sorgulama ve hayatın farklı dinamiklerini anlamlandırma sürecinde olduğunuzu yansıtıyor. Kendinize karşı yargılayıcı değil, meraklı bir araştırmacı gibi yaklaşabilmeniz zihinsel berraklığınızı artırıyor.`;
-  }
+  const randomIntro = intros[Math.floor(Math.random() * intros.length)];
+  const randomBody = themeObservations[Math.floor(Math.random() * themeObservations.length)];
+  const randomClosing = closings[Math.floor(Math.random() * closings.length)];
 
-  // Detect Personal Mindful Strengths
+  const overallVibe = `${randomIntro} ${randomBody} ${randomClosing}`;
+
+  // 3. Detect Personal Mindful Strengths
   const strengths: string[] = [];
   strengths.push("Öz-Farkındalık Cesareti: İç dünyanızdaki duyguları yok saymak veya ertelemek yerine dürüstçe adlandırıp yazıya dökebilme gücünüz.");
   
@@ -230,37 +238,58 @@ export function generateLocalReflection(entries: ThoughtEntry[], timeframeLabel:
     strengths.push("İçsel Dinginlik Kapasitesi: Dış dünyanın gürültüsüne rağmen kendi iç merkezinize dönebilme kabiliyetiniz.");
   }
 
-  // Cognitive Patterns
-  const cognitivePatterns: string[] = [];
-  if (isChallengeHeavy || isAnxiousHeavy) {
-    cognitivePatterns.push("Kontrol ve Gelecek Odaklılık: Henüz gerçekleşmemiş olasılıkları planlamaya ve kontrol altında tutmaya eğilim göstererek şimdiki anın dinginliğini erteleme eğilimi seziliyor.");
+  // 4. Cognitive Patterns Pool (Dynamic selection)
+  const patternPool: string[] = [];
+  if (hasControlTheme || isAnxiousHeavy) {
+    patternPool.push("Kontrol ve Gelecek Odaklılık: Henüz gerçekleşmemiş olasılıkları planlamaya ve kontrol altında tutmaya eğilim göstererek şimdiki anın dinginliğini erteleme eğilimi seziliyor.");
+  }
+  if (hasControlTheme) {
+    patternPool.push("Mükemmeliyetçilik ve Aşırı Sorumluluk: Olayların başarısını tamamen kendi üzerinize alarak hata payına veya dinlenmeye tolerans tanımakta zorlanma kalıbı.");
   }
   if (isGratitudeHeavy) {
-    cognitivePatterns.push("Şükran Odaklı Dönüşüm: Zorlayıcı koşullarda dahi küçük kazanımları ve teşekkür edilecek detayları görebilme zihinsel esnekliği mevcut.");
+    patternPool.push("Şükran Odaklı Dönüşüm: Zorlayıcı koşullarda dahi küçük kazanımları ve teşekkür edilecek detayları görebilme zihinsel esnekliği mevcut.");
   }
-  cognitivePatterns.push("İçsel Yansıtma ve Anlam Arayışı: Yaşanan olayları yalnızca yüzeysel geçiştirmek yerine, kendi duygu ve düşünce süreçlerinizle bağdaştırarak anlamlandırma beceriniz yüksek.");
-  if (cognitivePatterns.length < 3) {
-    cognitivePatterns.push("Gereklilik Kalıpları: Kendinize zaman zaman yüksek standartlar koyarak dinlenmeyi hak edilmesi gereken zorlu bir ödül gibi algılama eğilimi gözleniyor.");
+  if (reflectionCount > 0 || intentionCount > 0) {
+    patternPool.push("İçsel Yansıtma ve Anlam Arayışı: Yaşanan olayları yalnızca yüzeysel geçiştirmek yerine, kendi duygu ve düşünce süreçlerinizle bağdaştırarak anlamlandırma beceriniz yüksek.");
   }
+  patternPool.push("Gereklilik Kalıpları (-Meli/-Malı): Kendinize yüksek standartlar koyarak mola vermeyi hak edilmesi gereken bir ödül gibi algılama eğilimi.");
+  patternPool.push("Zihinsel Filtreleme: Olumlu detaylar yerine çözülmeyi bekleyen eksikliklere ve pürüzlere odaklanma refleksi.");
 
-  const growthRecommendations: string[] = [
+  // Shuffle and take top 2 or 3
+  const shuffledPatterns = [...patternPool].sort(() => 0.5 - Math.random());
+  const cognitivePatterns = shuffledPatterns.slice(0, 3);
+
+  // 5. Growth Recommendations Pool
+  const advicePool: string[] = [
     "Duygularınızı Bastırmadan Karşılayın: Zor bir his belirdiğinde onu hemen çözmeye çalışmak yerine 'Şu an bu hissi deneyimliyorum ve bu insani' diyerek 2 dakika sadece nefesinizle kalın.",
     "Mikro Şükran Molaları: Gün içinde zihniniz gerildiğinde sadece çevrenizdeki 3 nesneye dikkatle bakıp duyularınızla ana dönün.",
-    "Kendinize Yakın Bir Dost Gibi Konuşun: Kendinizi eleştirirken kullandığınız cümleleri, sevdiğiniz bir dosta söyler miydiniz? Kendinize aynı nezaketle seslenin."
+    "Kendinize Yakın Bir Dost Gibi Konuşun: Kendinizi eleştirirken kullandığınız cümleleri, sevdiğiniz bir dosta söyler miydiniz? Kendinize aynı nezaketle seslenin.",
+    "Kontrol Çemberi Ayrımı: Zihninizi meşgul eden konuyu ikiye bölün: 'Doğrudan değiştirebileceklerim' ve 'Elimde olmayanlar'. Sadece etki alanınıza odaklanın.",
+    "Bilinçli Yavaşlama Molası: Gün içinde acele ettiğinizi fark ettiğiniz ilk an 15 saniye durun, omuzlarınızı gevşetin ve derin bir nefes bırakın."
   ];
+  const shuffledAdvice = [...advicePool].sort(() => 0.5 - Math.random());
+  const growthRecommendations = shuffledAdvice.slice(0, 3);
 
-  let mindfulAffirmation = "Bugün kendime nazik davranmayı, her şeyi tek başıma çözmek zorunda olmadığımı ve olduğum halimle değerli olduğumu hatırlıyorum.";
-  if (isAnxiousHeavy) {
-    mindfulAffirmation = "Şu an hissettiğim kaygı geçici bir dalgadır. Derin bir nefes alıyor ve yalnızca etki alanımdaki tek bir adıma odaklanıyorum.";
-  } else if (dominantMood === Mood.CALM || dominantMood === Mood.GRATEFUL) {
-    mindfulAffirmation = "İçimdeki huzur dış koşulların ötesindedir. Hayatın bana sunduğu küçük armağanları sevgiyle kucaklıyorum.";
-  } else if (dominantMood === Mood.EXCITED || dominantMood === Mood.HOPEFUL) {
-    mindfulAffirmation = "İçimdeki yaşam enerjisine ve potansiyele güveniyorum; acele etmeden, kendi ritmimde çiçek açıyorum.";
-  }
+  // 6. Dynamic Mindful Affirmations
+  const affirmations = [
+    "Bugün her şeyi tek başıma ve kusursuz yapmak zorunda değilim; sadece derin bir nefes alıp tek bir adıma odaklanıyorum.",
+    "İçimdeki huzur dış koşulların ötesindedir. Hayatın bana sunduğu küçük armağanları sevgiyle kucaklıyorum.",
+    "Zihnimdeki geçici dalgalara saygı duyuyorum; ben dalgaların kendisi değil, engin denizin ta kendisiyim.",
+    "Kendime nazik davranmayı ve insan olmanın getirdiği sınırları şefkatle kabul etmeyi seçiyorum.",
+    "İçimdeki yaşam enerjisine ve potansiyele güveniyorum; acele etmeden, kendi ritmimde çiçek açıyorum.",
+    "Bugün kontrol edemediğim belirsizlikleri akışa bırakıyor, yalnızca kendi içsel huzuruma sahip çıkıyorum."
+  ];
+  const mindfulAffirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
 
-  const introspectiveQuestion = isAnxiousHeavy
-    ? "Eğer şu an zihnimi meşgul eden bu durumun mükemmel çözülmesine gerek olmasaydı, kendime bugün nasıl bir hafiflik hediye ederdim?"
-    : "Bugün sadece bir şeyleri başarmak için değil, yalnızca 'var olmak' ve kendimle baş başa kalmak için neye ihtiyacım var?";
+  // 7. Dynamic Introspective Questions
+  const questions = [
+    "Eğer şu an zihnimi meşgul eden bu durumun mükemmel çözülmesine gerek olmasaydı, kendime bugün nasıl bir hafiflik hediye ederdim?",
+    "Bugün sadece bir şeyleri başarmak için değil, yalnızca 'var olmak' ve kendimle baş başa kalmak için neye ihtiyacım var?",
+    "Zihnimdeki bu sorumluluk yükünün ne kadarı gerçekten bana ait, ne kadarını gereksiz yere tek başıma sırtlandım?",
+    "En son ne zaman hiçbir şey üretmek zorunda olmadan sadece kendime içten bir 'teşekkür ederim' dedim?",
+    "Bugün iç sesim beni en çok ne konuda uyarmaya veya korumaya çalışıyor?"
+  ];
+  const introspectiveQuestion = questions[Math.floor(Math.random() * questions.length)];
 
   return {
     overallVibe,

@@ -9,8 +9,10 @@ function resolveRelativeUrl(relPath) {
   }
 }
 
-// Initial static assets to cache on install (Icons & Manifest only)
+// Initial static assets to cache on install (for offline fallback)
 const STATIC_ASSETS = [
+  "./",
+  "./index.html",
   "./manifest.json",
   "./icon.svg",
   "./icon-512.png",

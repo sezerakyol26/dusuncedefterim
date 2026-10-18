@@ -352,8 +352,12 @@ export default function Inspiration({ onAddEntry }: InspirationProps) {
 
   // 3. Guided Journeys States
   const [journeyProgress, setJourneyProgress] = useState<Record<string, number>>(() => {
-    const cached = localStorage.getItem("thought_defteri_journey_progress");
-    return cached ? JSON.parse(cached) : {};
+    try {
+      const cached = localStorage.getItem("thought_defteri_journey_progress");
+      return cached ? JSON.parse(cached) : {};
+    } catch {
+      return {};
+    }
   });
   const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
   const [journeyResponse, setJourneyResponse] = useState("");

@@ -29,6 +29,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   handleReset = () => {
     localStorage.removeItem("thought_defteri_entries");
     localStorage.removeItem("thought_defteri_reflection");
+    localStorage.removeItem("thought_defteri_journey_progress");
+    if ('caches' in window) {
+      caches.keys().then((names) => {
+        names.forEach((name) => caches.delete(name));
+      });
+    }
     window.location.reload();
   };
 

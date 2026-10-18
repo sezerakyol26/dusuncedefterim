@@ -2,8 +2,9 @@
   "name": "Düşünce Defteri",
   "short_name": "Defter",
   "description": "Zihinsel farkındalık, kişisel gelişim ve günlük ilham veren yapay zekâ destekli iOS tarzı düşünce defteri.",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/dusuncedefterim/",
+  "scope": "/dusuncedefterim/",
+  "id": "/dusuncedefterim/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1C1814",
@@ -11,25 +12,25 @@
   "categories": ["lifestyle", "utilities", "productivity"],
   "icons": [
     {
-      "src": "./icon.svg",
+      "src": "/dusuncedefterim/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "./icon-512.png",
+      "src": "/dusuncedefterim/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-192.png",
+      "src": "/dusuncedefterim/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./apple-touch-icon.png",
+      "src": "/dusuncedefterim/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
     }

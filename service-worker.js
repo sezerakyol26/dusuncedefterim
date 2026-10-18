@@ -1,4 +1,4 @@
-const CACHE_NAME = "dusunce-defteri-v3";
+const CACHE_NAME = "dusunce-defteri-v4";
 
 // Helper to resolve paths relative to Service Worker location
 function resolveRelativeUrl(relPath) {
@@ -35,7 +35,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate event: immediately purge old caches (v1, v2, etc.)
+// Activate event: immediately purge old caches (v1, v2, v3, etc.)
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -46,7 +46,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch event: Network-First for HTML/Navigations, Cache-First for versioned assets
+// Fetch event: Network-First for HTML/Navigations, Cache-First with robust fallback for assets
 self.addEventListener("fetch", (event) => {
   // Only handle GET requests and same-origin URLs
   if (event.request.method !== "GET" || !event.request.url.startsWith(self.location.origin)) {
@@ -62,9 +62,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 1. Navigation requests (HTML pages): NETWORK FIRST
-  // This guarantees that after any new deploy, the user always receives the latest HTML
-  // referencing the correct JS/CSS hashes, preventing the white screen trap.
+  // 1. Navigation requests (HTML pages): NETWORK FIRST with cache fallback
   if (event.request.mode === "navigate" || event.request.destination === "document") {
     event.respondWith(
       fetch(event.request)
@@ -99,18 +97,20 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+      return fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
           return networkResponse;
-        }
-
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
+        })
+        .catch(() => {
+          // In case of network failure, try matching any relative URL
+          return caches.match(event.request);
         });
-
-        return networkResponse;
-      });
     })
   );
 });

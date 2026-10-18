@@ -169,15 +169,20 @@
           <div class="splash-dot"></div>
         </div>
 
-        <div id="splash-recovery">
-          <p style="font-size: 12px; color: #555; margin: 0 0 10px 0; line-height: 1.4;">
-            Önbelleğe alınmış eski bir sürüm veya ağ aksaması tespit edildi.
-          </p>
-          <button class="btn-recovery" onclick="window.__clearCacheAndReload()">
-            Önbelleği Temizle ve Yeniden Başlat
+        <!-- Discreet helper that appears only if loading takes more than 12 seconds -->
+        <div id="splash-delayed-hint" style="display: none; margin-top: 32px; font-size: 11px; color: #8E8E93;">
+          <span>Yükleme beklenenden uzun mu sürdü?</span><br />
+          <button onclick="window.__clearCacheAndReload()" style="background: none; border: none; color: #A2845E; font-size: 11px; font-weight: 600; text-decoration: underline; cursor: pointer; margin-top: 6px;">
+            Önbelleği Temizle ve Yeniden Yükle
           </button>
-          <button class="btn-recovery-sec" onclick="window.location.reload()">
-            Sayfayı Yenile
+        </div>
+
+        <!-- Error display only on fatal script errors -->
+        <div id="splash-error-box" style="display: none; margin-top: 24px; max-width: 320px; padding: 14px; background: rgba(255, 240, 240, 0.95); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 16px; text-align: left;">
+          <div style="font-size: 12px; font-weight: bold; color: #D70015; margin-bottom: 4px;">Başlatma Hatası</div>
+          <div id="splash-error-msg" style="font-size: 11px; color: #666; font-family: monospace; word-break: break-all; margin-bottom: 10px;"></div>
+          <button onclick="window.__clearCacheAndReload()" style="background: #A2845E; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: bold; width: 100%; cursor: pointer;">
+            Önbelleği Sıfırla ve Başlat
           </button>
         </div>
       </div>
@@ -185,40 +190,44 @@
 
     <!-- Self-Healing Recovery Helper -->
     <script>
-      window.__clearCacheAndReload = function() {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            for (var i = 0; i < regs.length; i++) {
-              regs[i].unregister();
-            }
-          });
+      window.__clearCacheAndReload = async function() {
+        try {
+          if ('serviceWorker' in navigator) {
+            var regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function(r) { return r.unregister(); }));
+          }
+          if ('caches' in window) {
+            var keys = await caches.keys();
+            await Promise.all(keys.map(function(k) { return caches.delete(k); }));
+          }
+        } catch (err) {
+          console.warn('Cache clearing error:', err);
         }
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            for (var i = 0; i < names.length; i++) {
-              caches.delete(names[i]);
-            }
-          });
-        }
-        sessionStorage.clear();
-        setTimeout(function() {
-          window.location.reload(true);
-        }, 150);
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (e) {}
+        window.location.replace(window.location.origin + window.location.pathname + '?ts=' + Date.now());
       };
 
-      // If React does not mount within 3.5 seconds, reveal recovery options
+      // Only show hint if truly stuck after 12 seconds
       setTimeout(function() {
         var loader = document.getElementById('app-splash-loader');
-        var recovery = document.getElementById('splash-recovery');
-        if (loader && recovery) {
-          recovery.style.display = 'block';
+        var hint = document.getElementById('splash-delayed-hint');
+        if (loader && hint) {
+          hint.style.display = 'block';
         }
-      }, 3500);
+      }, 12000);
 
       window.addEventListener('error', function(e) {
-        var recovery = document.getElementById('splash-recovery');
-        if (recovery) {
-          recovery.style.display = 'block';
+        // If a fatal script or syntax error occurs on main bundle
+        if (e && e.message && !e.message.includes('ResizeObserver')) {
+          var errBox = document.getElementById('splash-error-box');
+          var errMsg = document.getElementById('splash-error-msg');
+          if (errBox && errMsg) {
+            errMsg.textContent = e.message || 'Bileşen başlatılamadı';
+            errBox.style.display = 'block';
+          }
         }
       });
     </script>

@@ -15,7 +15,6 @@
     <link rel="icon" type="image/png" sizes="48x48" href="./favicon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="manifest" href="./manifest.json" />
 
     <!-- iOS & Android Standalone App Settings -->
@@ -26,93 +25,214 @@
     <meta name="application-name" content="Düşünce Defteri" />
     <meta name="theme-color" content="#1C1814" />
 
-    <link rel="stylesheet" href="./assets/app.css" />
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              stone: {
-                850: '#201c18',
-                950: '#0c0a09'
-              }
-            },
-            fontFamily: {
-              sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-              display: ["Space Grotesk", "sans-serif"],
-              serif: ["Lora", "Georgia", "serif"]
-            }
-          }
+    <style>
+      :root {
+        --bg-main: #FDFBF7;
+        --text-main: #1C1814;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-main: #0c0a09;
+          --text-main: #f5f5f4;
         }
       }
-    </script>
-
-    <style>
       body {
         font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #FDFCFB;
-        color: #1C1C1E;
+        background-color: var(--bg-main);
+        color: var(--text-main);
         -webkit-font-smoothing: antialiased;
-      }
-      .dark body {
-        background-color: #0c0a09;
-        color: #f5f5f4;
-      }
-      .scrollbar-none::-webkit-scrollbar { display: none; }
-      .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-      .ios-glass {
-        background: rgba(253, 251, 247, 0.88);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-      }
-      .dark .ios-glass {
-        background: rgba(12, 10, 9, 0.88);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        margin: 0;
+        padding: 0;
       }
       .safe-top-padding { padding-top: max(env(safe-area-inset-top, 0px), 14px); }
       .safe-bottom-padding { padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px); }
-    </style>
 
-    <!-- Import Map: Zero-Build browser native execution -->
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@19.0.0",
-        "react/": "https://esm.sh/react@19.0.0/",
-        "react-dom": "https://esm.sh/react-dom@19.0.0",
-        "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-        "lucide-react": "https://esm.sh/lucide-react@0.475.0",
-        "firebase/app": "https://esm.sh/firebase@11.4.0/app",
-        "firebase/firestore": "https://esm.sh/firebase@11.4.0/firestore",
-        "@google/genai": "https://esm.sh/@google/genai@2.4.0"
+      /* Initial Elegant Splash / Recovery Layout */
+      #app-splash-loader {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+        text-align: center;
       }
-    }
-    </script>
+      .splash-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        background: #1C1814;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 25px -5px rgba(28, 24, 20, 0.25);
+      }
+      .splash-title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+      .splash-sub {
+        font-size: 13px;
+        color: #8E8E93;
+        max-width: 280px;
+        line-height: 1.4;
+      }
+      .splash-dots {
+        display: flex;
+        gap: 6px;
+        margin-top: 24px;
+      }
+      .splash-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #A2845E;
+        animation: pulseDot 1.4s infinite ease-in-out both;
+      }
+      .splash-dot:nth-child(1) { animation-delay: -0.32s; }
+      .splash-dot:nth-child(2) { animation-delay: -0.16s; }
+      @keyframes pulseDot {
+        0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+        40% { transform: scale(1); opacity: 1; }
+      }
+      #splash-recovery {
+        display: none;
+        margin-top: 24px;
+        max-width: 340px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 18px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      }
+      .btn-recovery {
+        background: #A2845E;
+        color: #fff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+      }
+      .btn-recovery-sec {
+        background: transparent;
+        color: #8E8E93;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 8px;
+      }
+    </style>
   </head>
   <body class="overflow-x-hidden select-none bg-[#FDFBF7] dark:bg-stone-950">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Elegant Inline Splash Screen (Replaced automatically as soon as React mounts) -->
+      <div id="app-splash-loader">
+        <div class="splash-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FAF8F5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+            <path d="M6 6h10"></path>
+            <path d="M6 10h10"></path>
+          </svg>
+        </div>
+        <div class="splash-title">Düşünce Defteri</div>
+        <div class="splash-sub">Zihninizi dinleyin, anı yakalayın...</div>
+        <div class="splash-dots" id="splash-dots">
+          <div class="splash-dot"></div>
+          <div class="splash-dot"></div>
+          <div class="splash-dot"></div>
+        </div>
 
-    <!-- Production Standalone App Bundle (Runs directly without any build step) -->
-    <script type="module" src="./assets/app.js"></script>
+        <div id="splash-recovery">
+          <p style="font-size: 12px; color: #555; margin: 0 0 10px 0; line-height: 1.4;">
+            Önbelleğe alınmış eski bir sürüm veya ağ aksaması tespit edildi.
+          </p>
+          <button class="btn-recovery" onclick="window.__clearCacheAndReload()">
+            Önbelleği Temizle ve Yeniden Başlat
+          </button>
+          <button class="btn-recovery-sec" onclick="window.location.reload()">
+            Sayfayı Yenile
+          </button>
+        </div>
+      </div>
+    </div>
 
-    <!-- Register PWA Service Worker -->
+    <!-- Self-Healing Recovery Helper -->
+    <script>
+      window.__clearCacheAndReload = function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            for (var i = 0; i < regs.length; i++) {
+              regs[i].unregister();
+            }
+          });
+        }
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (var i = 0; i < names.length; i++) {
+              caches.delete(names[i]);
+            }
+          });
+        }
+        sessionStorage.clear();
+        setTimeout(function() {
+          window.location.reload(true);
+        }, 150);
+      };
+
+      // If React does not mount within 3.5 seconds, reveal recovery options
+      setTimeout(function() {
+        var loader = document.getElementById('app-splash-loader');
+        var recovery = document.getElementById('splash-recovery');
+        if (loader && recovery) {
+          recovery.style.display = 'block';
+        }
+      }, 3500);
+
+      window.addEventListener('error', function(e) {
+        var recovery = document.getElementById('splash-recovery');
+        if (recovery) {
+          recovery.style.display = 'block';
+        }
+      });
+    </script>
+
+    <!-- Main Vite Application Entry -->
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Register PWA Service Worker with Auto-Update -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
+        window.addEventListener('load', function() {
           navigator.serviceWorker.register('./service-worker.js')
-            .then((registration) => {
+            .then(function(registration) {
               console.log('Düşünce Defteri SW aktif:', registration.scope);
+              // Check for SW updates
+              registration.onupdatefound = function() {
+                var installingWorker = registration.installing;
+                if (installingWorker) {
+                  installingWorker.onstatechange = function() {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      // New content is available, prompt or auto-activate
+                      console.log('Yeni Düşünce Defteri sürümü hazır.');
+                    }
+                  };
+                }
+              };
             })
-            .catch((error) => {
+            .catch(function(error) {
               console.warn('SW kaydı:', error);
             });
         });

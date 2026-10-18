@@ -5,9 +5,9 @@ on:
     branches: ["main", "master"]
   workflow_dispatch:
 
-# Grant GitHub Pages deployment permissions
+# Grant GitHub Pages and contents write permissions
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -24,6 +24,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,6 +39,15 @@ jobs:
       - name: Build Vite PWA
         run: npm run build:client
 
+      - name: Sync compiled bundle to branch root (Ensures branch deployment works seamlessly)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          cp -f dist/index.html ./index.html
+          cp -rf dist/assets ./
+          git add index.html assets/
+          git diff --staged --quiet || (git commit -m "build: compile assets for GitHub Pages branch deployment [skip ci]" && git push origin main)
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -44,6 +56,7 @@ jobs:
         with:
           path: './dist'
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (Actions mode)
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4

@@ -1170,7 +1170,7 @@ export default function App() {
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-850 dark:text-white text-base font-serif">Yapay Zeka (AI) Ayarları</h3>
-                  <span className="text-[10px] text-stone-400 font-mono">Google Gemini 2.5 Flash & Bilişsel CBT</span>
+                  <span className="text-[10px] text-stone-400 font-mono">Google Gemini Flash & Akıllı Bilişsel CBT</span>
                 </div>
               </div>
               <button 
@@ -1189,13 +1189,13 @@ export default function App() {
                   <span>AI Durumu: Kesintisiz Aktif</span>
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white dark:bg-stone-900 border border-amber-200/50 text-[#A2845E] font-bold">
-                  {geminiApiKeyInput.trim() ? "Gemini 2.5 Flash" : "Akıllı Yerel CBT"}
+                  {geminiApiKeyInput.trim() ? "Google Gemini Flash" : "Akıllı Bilişsel CBT"}
                 </span>
               </div>
               <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-relaxed font-serif">
                 {geminiApiKeyInput.trim() 
-                  ? "Kişisel Google Gemini API anahtarınız tanımlandı. Bilişsel analizler ve günün ilhamları doğrudan Google GenAI 2.5 Flash modeliyle üretilir."
-                  : "Uygulama, API anahtarı olmasa bile çalışan dahili akıllı Türkçe CBT ve öz-şefkat analiz motoruna sahiptir. Dilerseniz kendi Google Gemini anahtarınızı ekleyerek bulut yapay zekasını da bağlayabilirsiniz."
+                  ? "Kişisel Google Gemini API anahtarınız tanımlandı. Bilişsel analizler, yeniden çerçevelemeler ve günün ilhamları doğrudan Google Gemini Flash modeliyle üretilir."
+                  : "Uygulama, API anahtarı olmasa bile kesintisiz çalışan dahili Türkçe psikolojik analiz ve CBT motoruna sahiptir. Dilerseniz kendi Google Gemini anahtarınızı ekleyerek bulut yapay zekasını da bağlayabilirsiniz."
                 }
               </p>
             </div>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "dusunce-defteri-v4";
+const CACHE_NAME = "dusunce-defteri-v7";
 
 // Helper to resolve paths relative to Service Worker location
 function resolveRelativeUrl(relPath) {
